@@ -12,9 +12,9 @@ from ATATools import ata_control
 from datetime import datetime
 from astropy.time import Time as astropy_Time
 
-from . import snap_hpguppi_defaults as hpguppi_defaults
-from . import auxillary as hpguppi_auxillary
-from . import record_in as hpguppi_record_in
+from SNAPobs.snap_hpguppi import snap_hpguppi_defaults as hpguppi_defaults
+from SNAPobs.snap_hpguppi import auxillary as hpguppi_auxillary
+from SNAPobs.snap_hpguppi import record_in as hpguppi_record_in
 
 from ATATools.ata_rest import ATARestException
 
@@ -181,6 +181,14 @@ def populate_meta(stream_hostnames: StringList, ant_names: StringList,
 
     skyfreq_mapping, antname_mapping = _get_stream_mapping(stream_hostnames,
             ignore_control)
+    lo_freqs = list(
+        map(
+            str,
+            set(skyfreq_mapping.values())
+        )
+    )
+    lo_freqs.sort()
+    lo_frequencies_string = '-'.join(lo_freqs)
     ants_obs_params = _get_obs_params(ant_names)
     source_list = [aop['SOURCE'] for antname, aop in ants_obs_params.items()]
     ant0_obs_params = ants_obs_params[ant_names[0]]
@@ -279,6 +287,7 @@ def populate_meta(stream_hostnames: StringList, ant_names: StringList,
                 'OBSBW'    : obsbw,
                 'SCHAN'    : schan,
                 'SUBBAND'  : 'C{}'.format(str(schan).zfill(4)),
+                'LO_FREQS' : lo_frequencies_string,
                 'NCHAN'    : n_chans_per_dest,
                 'OBSNCHAN' : nants*n_chans_per_dest,
                 'OBSFREQ'  : obsfreq,
